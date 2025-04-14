@@ -1,5 +1,6 @@
 package dev.audit.demo.api
 
+import dev.audit.demo.exception.*
 import dev.audit.demo.mapper.toResponse
 import dev.audit.demo.model.*
 import dev.audit.demo.service.UserService
@@ -10,46 +11,94 @@ import org.springframework.web.bind.annotation.RestController
 class UserControllerImpl(private val userService: UserService) : UsersApi {
 
     override fun createUser(userCreateRequest: UserCreateRequest): ResponseEntity<UserResponse> =
-        userService.createUser(userCreateRequest)
-            .toResponse()
-            .let { ResponseEntity.status(201).body(it) }
+        try {
+            userService.createUser(userCreateRequest)
+                .toResponse()
+                .let { ResponseEntity.status(201).body(it) }
+        } catch (e: Exception) {
+            throw when (e) {
+                is DuplicateResourceException -> ConflictException(e.message)
+                is ValidationException -> BadRequestException(e.message)
+                else -> InternalServerException(e.message)
+            }
+        }
 
     override fun getUser(id: Long): ResponseEntity<UserResponse> =
-        userService.getUser(id)
-            .toResponse()
-            .let { ResponseEntity.ok(it) }
+        try {
+            userService.getUser(id)
+                .toResponse()
+                .let { ResponseEntity.ok(it) }
+        } catch (e: Exception) {
+            throw when (e) {
+                is ResourceNotFoundException -> UserNotFoundException(e.message)
+                else -> InternalServerException(e.message)
+            }
+        }
 
     override fun updateUser(id: Long, userUpdateRequest: UserUpdateRequest): ResponseEntity<UserResponse> =
-        userService.updateUser(id, userUpdateRequest)
-            .toResponse()
-            .let { ResponseEntity.ok(it) }
+        try {
+            userService.updateUser(id, userUpdateRequest)
+                .toResponse()
+                .let { ResponseEntity.ok(it) }
+        } catch (e: Exception) {
+            throw when (e) {
+                is ResourceNotFoundException -> UserNotFoundException(e.message)
+                is DuplicateResourceException -> ConflictException(e.message)
+                is ValidationException -> BadRequestException(e.message)
+                else -> InternalServerException(e.message)
+            }
+        }
 
     override fun deleteUser(id: Long): ResponseEntity<Unit> =
-        userService.deleteUser(id)
-            .let { ResponseEntity.noContent().build() }
+        try {
+            userService.deleteUser(id)
+                .let { ResponseEntity.noContent().build() }
+        } catch (e: Exception) {
+            throw when (e) {
+                is ResourceNotFoundException -> UserNotFoundException(e.message)
+                else -> InternalServerException(e.message)
+            }
+        }
 
     override fun patchUser(id: Long, userUpdateRequest: UserUpdateRequest): ResponseEntity<UserResponse> =
-        userService.patchUser(id, userUpdateRequest)
-            .toResponse()
-            .let { ResponseEntity.ok(it) }
+        try {
+            userService.patchUser(id, userUpdateRequest)
+                .toResponse()
+                .let { ResponseEntity.ok(it) }
+        } catch (e: Exception) {
+            throw when (e) {
+                is ResourceNotFoundException -> UserNotFoundException(e.message)
+                is DuplicateResourceException -> ConflictException(e.message)
+                is ValidationException -> BadRequestException(e.message)
+                else -> InternalServerException(e.message)
+            }
+        }
 
     override fun getUserAudit(id: Long, page: Int, size: Int, sort: String): ResponseEntity<UserAuditPage> =
-        userService.getUserAuditLog(id, page, size, sort)
-            .let { logs ->
-                UserAuditPage(
-                    content = logs.map { log ->
-                        UserAuditEntry(
-                            revisionId = log.revisionId,
-                            revisionType = log.revisionType,
-                            timestamp = log.timestamp,
-                            entity = log.entity
-                        )
-                    },
-                    totalElements = logs.size,
-                    totalPages = 1,
-                    propertySize = logs.size,
-                    number = 0
-                )
+        try {
+            userService.getUserAuditLog(id, page, size, sort)
+                .let { logs ->
+                    UserAuditPage(
+                        content = logs.map { log ->
+                            UserAuditEntry(
+                                revisionId = log.revisionId,
+                                revisionType = log.revisionType,
+                                timestamp = log.timestamp,
+                                entity = log.entity
+                            )
+                        },
+                        totalElements = logs.size,
+                        totalPages = 1,
+                        propertySize = logs.size,
+                        number = page
+                    )
+                }
+                .let { ResponseEntity.ok(it) }
+        } catch (e: Exception) {
+            throw when (e) {
+                is ResourceNotFoundException -> UserNotFoundException(e.message)
+                is ValidationException -> BadRequestException(e.message)
+                else -> InternalServerException(e.message)
             }
-            .let { ResponseEntity.ok(it) }
+        }
 }

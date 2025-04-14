@@ -1,6 +1,7 @@
 package dev.audit.demo.service
 
 import dev.audit.demo.entity.UserEntity
+import dev.audit.demo.exception.ResourceNotFoundException
 import dev.audit.demo.mapper.toEntity
 import dev.audit.demo.mapper.toResponse
 import dev.audit.demo.model.UserAuditEntry
@@ -28,7 +29,7 @@ class UserServiceImpl(
 
     override fun getUser(id: Long): UserEntity =
         userRepository.findById(id)
-            .orElseThrow { NoSuchElementException("User not found") }
+            .orElseThrow { ResourceNotFoundException("User not found") }
 
     @Transactional
     override fun updateUser(id: Long, userUpdateRequest: UserUpdateRequest): UserEntity =
@@ -46,7 +47,7 @@ class UserServiceImpl(
     @Transactional
     override fun deleteUser(id: Long) {
         userRepository.findById(id)
-            .orElseThrow { NoSuchElementException("User not found") }
+            .orElseThrow { ResourceNotFoundException("User not found") }
             .let { userRepository.deleteById(id) }
     }
 
