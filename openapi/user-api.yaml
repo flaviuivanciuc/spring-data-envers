@@ -1,0 +1,231 @@
+openapi: 3.0.3
+info:
+  title: User Management API
+  version: 0.0.1
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /users/{id}:
+    get:
+      summary: Get user information
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: User not found
+
+    put:
+      summary: Update user information
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: User not found
+
+    delete:
+      operationId: deleteUser
+      summary: Delete a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+
+    patch:
+      operationId: patchUser
+      summary: Partially update a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: User not found
+
+  /users/{id}/audit:
+    get:
+      summary: Get audit log of user updates
+      operationId: getUserAudit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - $ref: '#/components/parameters/SortDirectionParam'
+      responses:
+        '200':
+          description: Paginated list of user updates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAuditPage'
+        '404':
+          description: User not found
+
+components:
+  parameters:
+    SortDirectionParam:
+      name: sort
+      in: query
+      description: Sort direction for audit entries by timestamp
+      required: false
+      schema:
+        type: string
+        enum: [ asc, desc ]
+        default: desc
+  schemas:
+    UserCreateRequest:
+      type: object
+      required: [ firstName, lastName, dateOfBirth, email ]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        email:
+          type: string
+          format: email
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        email:
+          type: string
+          format: email
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        email:
+          type: string
+          format: email
+
+    UserAuditEntry:
+      type: object
+      properties:
+        revisionId:
+          type: integer
+        revisionType:
+          type: string
+          enum: [ ADD, MOD, DEL ]
+        timestamp:
+          type: string
+          format: date-time
+        entity:
+          $ref: '#/components/schemas/UserResponse'
+
+    UserAuditPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAuditEntry'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
