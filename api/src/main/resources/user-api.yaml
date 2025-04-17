@@ -136,6 +136,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserUpdateRequest'
+            example:
+              email: "jane.doe@example.com"
       responses:
         '200':
           $ref: '#/components/responses/UserResponse'
@@ -168,14 +170,10 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/UserAuditResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -226,54 +224,123 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserResponse'
+          example:
+            id: 1
+            firstName: "John"
+            lastName: "Doe"
+            dateOfBirth: "1990-01-01"
+            email: "john.doe@example.com"
     UserResponse:
       description: User info
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/UserResponse'
+          example:
+            id: 1
+            firstName: "Alice"
+            lastName: "Brown"
+            dateOfBirth: "1985-11-23"
+            email: "alice.brown@example.com"
     UserAuditResponse:
       description: Paginated list of user updates
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/UserAuditPage'
+          example:
+            content:
+              - revisionId: 101
+                revisionType: "MOD"
+                timestamp: "2023-12-10T14:45:00Z"
+                entity:
+                  id: 1
+                  firstName: "Alice"
+                  lastName: "Brown"
+                  dateOfBirth: "1985-11-23"
+                  email: "alice.brown@example.com"
+            totalElements: 1
+            totalPages: 1
+            size: 20
+            number: 0
     BadRequest:
       description: Invalid request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2023-12-10T14:45:00Z"
+            status: 400
+            error: "Bad Request"
+            message: "Invalid email address format"
+            path: "/api/v1/users"
+            requestId: "ab4b28d2cd3385fdfba035e6f39a7b24"
     Unauthorized:
       description: Authentication required
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2023-12-10T14:45:00Z"
+            status: 401
+            error: "Unauthorized"
+            message: "Authentication required"
+            path: "/api/v1/users"
+            requestId: "ab4b28d2cd3385fdfba035e6f39a7b24"
     Forbidden:
       description: Insufficient permissions
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2023-12-10T14:45:00Z"
+            status: 403
+            error: "Forbidden"
+            message: "Access is denied"
+            path: "/api/v1/users"
+            requestId: "ab4b28d2cd3385fdfba035e6f39a7b24"
     NotFound:
       description: Resource not found
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2023-12-10T14:45:00Z"
+            status: 404
+            error: "Not Found"
+            message: "User with ID 123 was not found"
+            path: "/api/v1/users/123"
+            requestId: "ab4b28d2cd3385fdfba035e6f39a7b24"
     Conflict:
       description: Resource conflict
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2023-12-10T14:45:00Z"
+            status: 409
+            error: "Conflict"
+            message: "Email already in use"
+            path: "/api/v1/users"
+            requestId: "ab4b28d2cd3385fdfba035e6f39a7b24"
     InternalError:
       description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2023-12-10T14:45:00Z"
+            status: 500
+            error: "Internal Server Error"
+            message: "An unexpected error occurred"
+            path: "/api/v1/users"
+            requestId: "ab4b28d2cd3385fdfba035e6f39a7b24"
 
   schemas:
     UserCreateRequest:
@@ -282,28 +349,36 @@ components:
       properties:
         firstName:
           type: string
+          example: "John"
         lastName:
           type: string
+          example: "Doe"
         dateOfBirth:
           type: string
           format: date
+          example: "1990-01-01"
         email:
           type: string
           format: email
+          example: "john.doe@example.com"
 
     UserUpdateRequest:
       type: object
       properties:
         firstName:
           type: string
+          example: "Jane"
         lastName:
           type: string
+          example: "Smith"
         dateOfBirth:
           type: string
           format: date
+          example: "1992-05-14"
         email:
           type: string
           format: email
+          example: "jane.smith@example.com"
 
     UserResponse:
       type: object
@@ -311,28 +386,36 @@ components:
         id:
           type: integer
           format: int64
+          example: 1
         firstName:
           type: string
+          example: "Alice"
         lastName:
           type: string
+          example: "Brown"
         dateOfBirth:
           type: string
           format: date
+          example: "1985-11-23"
         email:
           type: string
           format: email
+          example: "alice.brown@example.com"
 
     UserAuditEntry:
       type: object
       properties:
         revisionId:
           type: integer
+          example: 101
         revisionType:
           type: string
           enum: [ ADD, MOD, DEL ]
+          example: "MOD"
         timestamp:
           type: string
           format: date-time
+          example: "2023-12-10T14:45:00Z"
         entity:
           $ref: '#/components/schemas/UserResponse'
 
@@ -343,14 +426,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserAuditEntry'
+          example:
+            - revisionId: 101
+              revisionType: "ADD"
+              timestamp: "2023-01-01T12:00:00Z"
+              entity:
+                id: 1
+                firstName: "Alice"
+                lastName: "Brown"
+                dateOfBirth: "1985-11-23"
+                email: "alice.brown@example.com"
         totalElements:
           type: integer
+          example: 25
         totalPages:
           type: integer
+          example: 5
         size:
           type: integer
+          example: 5
         number:
           type: integer
+          example: 1
 
     ErrorResponse:
       type: object
@@ -358,11 +455,20 @@ components:
         timestamp:
           type: string
           format: date-time
+          example: "2023-12-10T14:45:00Z"
         status:
           type: integer
+          example: 400
         error:
           type: string
+          example: "Bad Request"
         message:
           type: string
+          example: "Invalid email address format"
         path:
           type: string
+          example: "/api/v1/users"
+        requestId:
+          type: string
+          description: Unique identifier for the request, useful for tracing
+          example: "ab4b28d2cd3385fdfba035e6f39a7b24"
