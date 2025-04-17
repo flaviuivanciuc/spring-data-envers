@@ -1,4 +1,4 @@
 FROM eclipse-temurin:21-jdk
 VOLUME /tmp
-COPY build/libs/demo-0.0.1-SNAPSHOT.jar app.jar
+COPY application/build/libs/app.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
