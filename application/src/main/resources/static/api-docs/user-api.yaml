@@ -12,9 +12,17 @@ security:
   - bearerAuth: [ ]
   - basicAuth: [ ]
 
+tags:
+  - name: Users API
+    description: Operations related to managing users
+  - name: Users Audit API
+    description: Operations related to user audit logs
+
 paths:
   /users:
     post:
+      tags:
+        - Users API
       security:
         - basicAuth: [ ]
       summary: Create a new user
@@ -41,6 +49,8 @@ paths:
 
   /users/{id}:
     get:
+      tags:
+        - Users API
       security:
         - basicAuth: [ ]
       summary: Get user information
@@ -60,6 +70,8 @@ paths:
           $ref: '#/components/responses/InternalError'
 
     put:
+      tags:
+        - Users API
       security:
         - basicAuth: [ ]
       summary: Update user information
@@ -89,6 +101,8 @@ paths:
           $ref: '#/components/responses/InternalError'
 
     delete:
+      tags:
+        - Users API
       security:
         - basicAuth: [ ]
       operationId: deleteUser
@@ -108,6 +122,8 @@ paths:
           $ref: '#/components/responses/InternalError'
 
     patch:
+      tags:
+        - Users API
       security:
         - basicAuth: [ ]
       operationId: patchUser
@@ -138,6 +154,8 @@ paths:
 
   /users/{id}/audit:
     get:
+      tags:
+        - Users Audit API
       security:
         - basicAuth: [ ]
       summary: Get audit log of user updates
