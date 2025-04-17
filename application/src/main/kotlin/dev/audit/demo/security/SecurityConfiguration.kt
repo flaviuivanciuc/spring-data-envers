@@ -2,6 +2,7 @@ package dev.audit.demo.security
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.User
@@ -21,7 +22,7 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                auth.requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                auth.requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyRole("ADMIN", "USER")
                     .anyRequest().authenticated()
             }
             .httpBasic {}

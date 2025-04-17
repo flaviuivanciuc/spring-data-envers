@@ -5,6 +5,7 @@ import dev.audit.demo.mapper.toResponse
 import dev.audit.demo.model.*
 import dev.audit.demo.service.UserService
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -23,6 +24,7 @@ class UserControllerImpl(private val userService: UserService) : UsersApi {
             }
         }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     override fun getUser(id: Long): ResponseEntity<UserResponse> =
         try {
             userService.getUser(id)
